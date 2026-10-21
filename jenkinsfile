@@ -1,0 +1,27 @@
+
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Source code is ready.'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t devops-flask-app:1.0 .'
+            }
+        }
+
+        stage('Deploy Application') {
+            steps {
+                sh '''
+                    docker rm -f devops-flask-app || true
+                    docker run -d --name devops-flask-app -p 5001:5000 devops-flask-app:1.0
+                '''
+            }
+        }
+    }
+}
