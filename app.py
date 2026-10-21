@@ -5,7 +5,7 @@ app = Flask(__name__)
 @app.route("/")
 def home():
     return """
-    <h1>My devops project 2 "version2"</h1>
+    <h1>My devops project 2 "version2 and this is for tesing the trigger action by using the scm poll in every 5 min"</h1>
     <p>Flask application running successfully!</p>
     <p>Built with Python, Docker, Jenkins and AWS.</p>
     """
