@@ -15,11 +15,44 @@ pipeline {
             }
         }
 
-        stage('Deploy Application') {
+        stage('Push Image to Amazon ECR') {
+            steps {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'aws-ecr-credentials',
+                        usernameVariable: 'AWS_ACCESS_KEY_ID',
+                        passwordVariable: 'AWS_SECRET_ACCESS_KEY'
+                    )
+                ]) {
+                    sh '''
+                        set +x
+                        export AWS_DEFAULT_REGION=ap-south-1
+
+                        aws ecr get-login-password \
+                            --region ap-south-1 |
+                        docker login \
+                            --username AWS \
+                            --password-stdin \
+                            241533160832.dkr.ecr.ap-south-1.amazonaws.com
+
+                        docker tag devops-flask-app:1.0 \
+                            241533160832.dkr.ecr.ap-south-1.amazonaws.com/devops-flask-app:1.0
+
+                        docker push \
+                            241533160832.dkr.ecr.ap-south-1.amazonaws.com/devops-flask-app:1.0
+
+                        docker logout 241533160832.dkr.ecr.ap-south-1.amazonaws.com
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy Application Locally') {
             steps {
                 sh '''
                     docker rm -f devops-flask-app || true
-                    docker run -d --name devops-flask-app -p 5001:5000 devops-flask-app:1.0
+                    docker run -d --name devops-flask-app \
+                        -p 5001:5000 devops-flask-app:1.0
                 '''
             }
         }
